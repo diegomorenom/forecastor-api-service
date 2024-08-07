@@ -107,3 +107,6 @@ docker-compose.yml
 # Ignore virtual environment
 virtualenv/
 lightning_logs/
+
+# Ignore temporary csv files
+*.csv
