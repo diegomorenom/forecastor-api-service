@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form
+from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Header
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -34,9 +34,15 @@ forecastingType = 'realtimeForecasting'
 
 app = FastAPI()
 
+API_KEY = "GXUmLFN0*Cc^S6q=/jhild5GnA_8Oe_P"
+
+def get_api_key(api_key: str = Header(...)):
+    if api_key != API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid API Key")
+
 @app.get("/")
 async def root():
-    return {"message": "Forecastor"}
+    return {"message": "Welcome to Forecastor"}
 
 # Configure CORS settings
 origins = [
@@ -68,7 +74,8 @@ async def process_forecast(prediction_column: str = Form(...),
                            forecast_days: int = Form(...),
                            selected_models: str = Form(...),
                            #forecasting_type: str = Form(...),
-                           csv_file: UploadFile = File(...)):
+                           csv_file: UploadFile = File(...),
+                           api_key: str = Depends(get_api_key)):
     
     
     # SAVE FILE CODE
@@ -91,7 +98,7 @@ async def process_forecast(prediction_column: str = Form(...),
     print(f"Received selected models: {selected_models_list}")
     #print(f"Received forecasting type: {forecasting_type}")
 
-    # Read CSV file
+    # Read parameters JSON file
     print(parameters_file)
     parameters_json = open(parameters_file)
     parameters = json.load(parameters_json)
